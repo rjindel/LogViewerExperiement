@@ -1,0 +1,24 @@
+﻿<Window x:Class="LogViewerExperiement.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LogViewerExperiement"
+        mc:Ignorable="d"
+        Title="UE4 Log Tool" Height="350" Width="525">
+    <DockPanel ScrollViewer.CanContentScroll="True">
+        <WrapPanel DockPanel.Dock="Top" >
+            <Button Height="25" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" Click="ShowOpenFileDialog" Content="Open Log" />
+            <Button Height="25" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" Click="" Content="Create Filter" />
+        </WrapPanel>
+        <WrapPanel VerticalAlignment="Bottom" DockPanel.Dock="Top" UseLayoutRounding="False">
+            <TextBox x:Name="SearchText" HorizontalContentAlignment="Stretch" MinWidth="330"/>
+            <Button Click="FindClicked" Content="Find Prev" />
+            <Button Click="FindClicked" Content="Find Next" />
+            <CheckBox x:Name="UseRegex" Content="Use Regex" />
+        </WrapPanel>
+        <!--<ListBox x:Name="LogText" TextWrapping="Wrap" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" />-->
+        <ListBox x:Name="LogText" />
+        <!--<TextBlock x:Name="LogText" />-->
+    </DockPanel>
+</Window>
