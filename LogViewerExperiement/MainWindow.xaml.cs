@@ -41,7 +41,6 @@ namespace LogViewerExperiement
         async void OpenFile(string Filename)
         {
             {
-                //MessageBox.Show("NotImplemented! Actually open selected file: " + fileDialog.FileName);
                 var stream = new StreamReader(Filename);
 
                 var Log = new List<TextBlock>();
@@ -49,8 +48,6 @@ namespace LogViewerExperiement
                 string line;
                 while ((line = await stream.ReadLineAsync()) != null)
                 {
-                    //TextBlock tb = new TextBlock();
-                    //tb.Inlines.Add(line);
                     TextBlock tb = filter.Process(line);
                     Log.Add(tb);
                 }
@@ -61,25 +58,36 @@ namespace LogViewerExperiement
 
         private void FindClicked(object sender, RoutedEventArgs e)
         {
-
             foreach (TextBlock item in LogText.ItemsSource)
             {
                 if (item.Text.ToString().Contains(SearchText.Text))
                 {
-                    item.Select(SearchText.Text);
+                    foreach(Run r in item.Inlines)
+                    {
+                        int index = r.Text.IndexOf(SearchText.Text);
+                        if(index != -1)
+                        {
+                            var newItem = new Run(r.Text.Substring(0, index));
+                            item.Inlines.InsertAfter(r, newItem);
+                            newItem = new Run(SearchText.Text) { Background = Brushes.Yellow };
+                            item.Inlines.InsertAfter(r, newItem);
+                            newItem = new Run(r.Text.Substring(index + SearchText.Text.Length));
+                            item.Inlines.InsertAfter(r, newItem);
+                            item.Inlines.Remove(r);
+                            break;
+                        }
+                    }
                     LogText.ScrollIntoView(item);
                     LogText.SelectedItem = item;
                     break;
                 }
 
             }
-            //if(LogText.Text.Length > SearchText.Text.Length)
-            //LogText.Items.
-            //{
-            //    int Index = LogText.Text.IndexOf(SearchText.Text);
-            //    double ScrollToLocation = (double)Index ;
-            //    LogText.ScrollToVerticalOffset(ScrollToLocation);
-            //}
+        }
+
+        private void NotImplemented(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Feature Not Implemented!");
         }
     }
 }

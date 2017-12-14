@@ -14,7 +14,8 @@ namespace LogViewerExperiement
     {
         //const string LOG_LINE_REGEX = @"^\[(?<year>\d*)\.(?<month>\d*)\.(?<day>\d*)-(?<hour>\d*)\.(?<minute>\d*)\.(?<second>\d*):(?<milisecond>\d*)\]\[(?<thing>\s*\d*)\](?<category>\w+):(?<message>.*)";
         //const string LOG_LINE_REGEX = @"^\[(?<year>\d+)\.(?<month>\d+)\.(?<day>\d+)-(?<hour>\d+)\.(?<minute>\d+)\.(?<second>\d+)\:(?<milisecond>\d+)\]\[(?<frame>\s*d*)\]";
-        const string LOG_LINE_REGEX = @"^\[(?<year>\d+)\.(?<month>\d+)\.(?<day>\d+)-(?<hour>\d+)\.(?<minute>\d+)\.(?<second>\d+)\:(?<milisecond>\d+)\]";
+        //const string LOG_LINE_REGEX = @"^\[(?<year>\d+)\.(?<month>\d+)\.(?<day>\d+)-(?<hour>\d+)\.(?<minute>\d+)\.(?<second>\d+)\:(?<milisecond>\d+)\]";
+        const string LOG_LINE_REGEX = @"^\[(\d+)\.(\d+)\:(?<year>\d+)\.(?<month>\d+)\.(?<day>\d+)-(?<hour>\d+)\.(?<minute>\d+)\.(?<second>\d+)]";
 
         Regex m_parser;
         public DateTimeFilter() {

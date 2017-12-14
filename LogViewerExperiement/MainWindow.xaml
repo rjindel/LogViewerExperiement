@@ -9,7 +9,7 @@
     <DockPanel ScrollViewer.CanContentScroll="True">
         <WrapPanel DockPanel.Dock="Top" >
             <Button Height="25" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" Click="ShowOpenFileDialog" Content="Open Log" />
-            <Button Height="25" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" Click="" Content="Create Filter" />
+            <Button Height="25" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" Click="NotImplemented" Content="Create Filter" />
         </WrapPanel>
         <WrapPanel VerticalAlignment="Bottom" DockPanel.Dock="Top" UseLayoutRounding="False">
             <TextBox x:Name="SearchText" HorizontalContentAlignment="Stretch" MinWidth="330"/>
