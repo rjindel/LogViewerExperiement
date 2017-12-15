@@ -13,7 +13,7 @@
         </WrapPanel>
         <WrapPanel VerticalAlignment="Bottom" DockPanel.Dock="Top" UseLayoutRounding="False">
             <TextBox x:Name="SearchText" HorizontalContentAlignment="Stretch" MinWidth="330"/>
-            <Button Click="FindClicked" Content="Find Prev" />
+            <Button Click="FindPrevious" Content="Find Prev" />
             <Button Click="FindClicked" Content="Find Next" />
             <CheckBox x:Name="UseRegex" Content="Use Regex" />
         </WrapPanel>
