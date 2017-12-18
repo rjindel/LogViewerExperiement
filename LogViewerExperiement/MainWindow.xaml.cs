@@ -184,5 +184,12 @@ namespace LogViewerExperiement
         {
             MessageBox.Show("Feature Not Implemented!");
         }
+
+        private void ShowFilterDialog(object sender, RoutedEventArgs e)
+        {
+            CreateFilter filter = new CreateFilter();
+            filter.ShowDialog();
+
+        }
     }
 }
