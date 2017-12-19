@@ -10,6 +10,10 @@ namespace LogViewerExperiement
 {
     class FilterData
     {
+        public override string ToString()
+        {
+                return m_Name;
+        }
         public string m_Name;
         public string m_FilterPattern;
         public Run m_Style;

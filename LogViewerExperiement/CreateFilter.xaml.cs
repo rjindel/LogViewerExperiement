@@ -25,6 +25,8 @@ namespace LogViewerExperiement
         public CreateFilter()
         {
             InitializeComponent();
+
+            CurrentFilter.SelectionChanged += new SelectionChangedEventHandler( Combo_SelectionChanged );
         }
 
         private void LoadDefaultFilter(object sender, RoutedEventArgs e)
@@ -39,10 +41,7 @@ namespace LogViewerExperiement
             List<FilterData> items =  new List<FilterData>();
             items.Add(data);
             CurrentFilter.ItemsSource = items;
-
-            SetCurrentFilter(data);
-            //HighlightFilter filter = new HighlightFilter(UE3_TIMESTAMP, data.m_Style);
-
+            CurrentFilter.SelectedIndex = 0;
         }
 
         private void SetCurrentFilter(FilterData data)
@@ -75,7 +74,7 @@ namespace LogViewerExperiement
             if (items.Count > 0)
             {
                 CurrentFilter.ItemsSource = items;
-                SetCurrentFilter(items[0]);
+                CurrentFilter.SelectedIndex = 0;
             }
         }
 
@@ -85,11 +84,19 @@ namespace LogViewerExperiement
             string filterStyle = XamlWriter.Save(style);
 
             StreamWriter writer = new StreamWriter("Filter.cfg");
-            //writer.Write("FilterName: \n");
             writer.WriteLine(FilterName.Text);
+
             writer.WriteLine(SearchFilter.Text);
             writer.WriteLine(filterStyle);
             writer.Close();
+        }
+        private void Combo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                FilterData Selected = e.AddedItems[0] as FilterData;
+                SetCurrentFilter(Selected);
+            }
         }
     }
 }
