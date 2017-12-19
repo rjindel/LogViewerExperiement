@@ -44,10 +44,10 @@ namespace LogViewerExperiement
                 var stream = new StreamReader(Filename);
 
                 var Log = new List<TextBlock>();
-                //DateTimeFilter filter = new DateTimeFilter 
+                //DateTimeFilter filter = new DateTimeFilter
 
                 //const string UE4_TIMESTAMP= @"^\[(?<year>\d+)\.(?<month>\d+)\.(?<day>\d+)-(?<hour>\d+)\.(?<minute>\d+)\.(?<second>\d+)\:(?<milisecond>\d+)\]";
-                const string UE3_TIMESTAMP = @"^\[(\d+)\.(\d+)\:(?<year>\d+)\.(?<month>\d+)\.(?<day>\d+)-(?<hour>\d+)\.(?<minute>\d+)\.(?<second>\d+)]";
+                const string UE3_TIMESTAMP = @"^\[(\d+)\.(\d+)\:(?<year>\d+)\.(?<month>\d+)\.(?<day>\d+)-(?<hour>\d+)\.(?<minute>\d+)\.(?<second>\d+)\]";
                 HighlightFilter filter = new HighlightFilter(UE3_TIMESTAMP, new Run() { FontWeight = FontWeights.Bold });
 
                 string line;
