@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Markup;
 using System.IO;
+using System.Reflection;
 
 namespace LogViewerExperiement
 {
@@ -22,11 +23,66 @@ namespace LogViewerExperiement
     /// </summary>
     public partial class CreateFilter : Window
     {
+        List<FontStyle> fontStyles;
+        List<FontWeight> fontWeights;
+        List<Brush> brushes;
         public CreateFilter()
         {
             InitializeComponent();
+            InitDialog();
 
-            CurrentFilter.SelectionChanged += new SelectionChangedEventHandler( Combo_SelectionChanged );
+            CurrentFilter.SelectionChanged += new SelectionChangedEventHandler( Combo_FilterChanged );
+        }
+
+        private void InitDialog()
+        {
+            //Need a better way. Reflection.
+            fontStyles = new List<FontStyle>() { FontStyles.Italic, FontStyles.Normal, FontStyles.Oblique };
+            FontStyleCombo.ItemsSource = fontStyles;
+
+            fontWeights = new List<FontWeight>() {
+                FontWeights.Black,
+                FontWeights.Bold,
+                FontWeights.DemiBold,
+                FontWeights.ExtraBlack,
+                FontWeights.ExtraBold,
+                FontWeights.ExtraLight,
+                FontWeights.Heavy,
+                FontWeights.Light,
+                FontWeights.Medium,
+                FontWeights.Normal,
+                FontWeights.Regular,
+                FontWeights.SemiBold,
+                FontWeights.Thin,
+                FontWeights.UltraLight,
+                FontWeights.UltraBlack,
+                FontWeights.UltraBold,
+            };
+            FontWeightCombo.ItemsSource = fontWeights;
+
+            //Try reflection for brushes (could be used for FontWeight + Style)
+            brushes = new List<Brush>();
+
+            Type brushesType = typeof(Brushes);
+            var properties = brushesType.GetProperties(BindingFlags.Static | BindingFlags.Public);
+            foreach(var prop in properties)
+            {
+                string name = prop.Name;
+                Brush brush = prop.GetValue(null, null) as Brush;
+                brushes.Add(brush);
+            }
+
+            ForegroundCombo.ItemsSource = brushes;
+            BackgroundCombo.ItemsSource = typeof(Colors).GetProperties();
+
+            BackgroundCombo.SelectedIndex = 0;
+            BackgroundCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_BackgroundChanged);
+            ForegroundCombo.SelectedIndex = 0;
+            ForegroundCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_ForegroundChanged);
+            FontStyleCombo.SelectedIndex = 0;
+            FontStyleCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_FontStyleChanged);
+            FontWeightCombo.SelectedIndex = 0;
+            FontWeightCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_FontWeightChanged);
         }
 
         private void LoadDefaultFilter(object sender, RoutedEventArgs e)
@@ -80,17 +136,33 @@ namespace LogViewerExperiement
 
         private void SaveFilter(object sender, RoutedEventArgs e)
         {
-            var style = viewer.Inlines.FirstInline;
-            string filterStyle = XamlWriter.Save(style);
-
             StreamWriter writer = new StreamWriter("Filter.cfg");
-            writer.WriteLine(FilterName.Text);
 
-            writer.WriteLine(SearchFilter.Text);
-            writer.WriteLine(filterStyle);
+            foreach(FilterData data in CurrentFilter.Items)
+            {
+                writer.WriteLine(data.m_Name);
+                writer.WriteLine(data.m_FilterPattern);
+                writer.WriteLine(data.m_Style.ToString());
+            }
+
+            FilterData firstItem = new FilterData();
+            if(CurrentFilter.Items.Count > 0)
+            {
+                firstItem = CurrentFilter.Items[0] as FilterData;
+            }
+
+            if (FilterName.Text != firstItem.m_Name)
+            {
+                var style = viewer.Inlines.FirstInline;
+                string filterStyle = XamlWriter.Save(style);
+
+                writer.WriteLine(FilterName.Text);
+                writer.WriteLine(SearchFilter.Text);
+                writer.WriteLine(filterStyle);
+            }
             writer.Close();
         }
-        private void Combo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Combo_FilterChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count > 0)
             {
@@ -98,5 +170,44 @@ namespace LogViewerExperiement
                 SetCurrentFilter(Selected);
             }
         }
+
+        private void Combo_BackgroundChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var style = viewer.Inlines.FirstInline;
+            if(e.AddedItems.Count == 1)
+            {
+                var colour = e.AddedItems[0] as PropertyInfo;
+                var value = (Color)colour.GetValue(null, null);
+                style.Background = new SolidColorBrush( value );
+            }
+        }
+        private void Combo_ForegroundChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var style = viewer.Inlines.FirstInline;
+            if(e.AddedItems.Count == 1)
+            {
+                Brush colour = e.AddedItems[0] as Brush;
+                style.Foreground = colour;
+            }
+        }
+        private void Combo_FontStyleChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var style = viewer.Inlines.FirstInline;
+            if(e.AddedItems.Count == 1)
+            {
+                FontStyle fontStyle = (FontStyle) e.AddedItems[0];
+                style.FontStyle = fontStyle;
+            }
+        }
+        private void Combo_FontWeightChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var style = viewer.Inlines.FirstInline;
+            if(e.AddedItems.Count == 1)
+            {
+                FontWeight fontWeight = (FontWeight) e.AddedItems[0];
+                style.FontWeight = fontWeight;
+            }
+        }
+
     }
 }
