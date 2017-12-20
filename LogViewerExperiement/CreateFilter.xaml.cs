@@ -23,15 +23,19 @@ namespace LogViewerExperiement
     /// </summary>
     public partial class CreateFilter : Window
     {
+        const string DefaultFilterName = "Filter Name";
+        const string DefaultSampleText = "Sample Text";
         List<FontStyle> fontStyles;
         List<FontWeight> fontWeights;
-        List<Run> brushes;
+        List<TextBlock> brushes;
+        List<FilterData> items; 
         public CreateFilter()
         {
             InitializeComponent();
             InitDialog();
 
-            CurrentFilter.SelectionChanged += new SelectionChangedEventHandler( Combo_FilterChanged );
+            CurrentFilter.SelectionChanged += Combo_FilterChanged;
+            LoadFilter();
         }
 
         private void InitDialog()
@@ -61,35 +65,44 @@ namespace LogViewerExperiement
             FontWeightCombo.ItemsSource = fontWeights;
 
             //Try reflection for brushes (could be used for FontWeight + Style)
-            brushes = new List<Run>();
+            brushes = new List<TextBlock>();
 
             Type brushesType = typeof(Brushes);
             var properties = brushesType.GetProperties(BindingFlags.Static | BindingFlags.Public);
             foreach(var prop in properties)
             {
                 Brush brush = prop.GetValue(null, null) as Brush;
-                Run foregroundRun = new Run(prop.Name) { Background = brush };
-                foregroundRun.MouseDown += new MouseButtonEventHandler(Combo_BackgroundClicked);
-                foregroundRun.MouseLeftButtonDown += new MouseButtonEventHandler(Combo_BackgroundClicked);
-                foregroundRun.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(Combo_BackgroundClicked);
-                brushes.Add(foregroundRun);
+                Run backgroundRun = new Run(prop.Name) { Background = brush };
+                TextBlock tb = new TextBlock(backgroundRun);
+                tb.TargetUpdated += BrushUpdated;
+
+                backgroundRun.MouseDown += Combo_BackgroundClicked;
+                //backgroundRun.MouseLeftButtonDown += new MouseButtonEventHandler(Combo_BackgroundClicked);
+                backgroundRun.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(Combo_BackgroundClicked);
+                //backgroundRun.PreviewMouseUp  += new MouseButtonEventHandler(Combo_BackgroundClicked);
+                brushes.Add(tb);
             }
 
             ForegroundCombo.ItemsSource = brushes;
-            BackgroundCombo.ItemsSource = new List<Run>( brushes );
+            BackgroundCombo.ItemsSource = new List<TextBlock>( brushes );
 
             BackgroundCombo.SelectedIndex = 0;
-            BackgroundCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_BackgroundChanged);
-            BackgroundCombo.MouseDown += new MouseButtonEventHandler(Combo_BackgroundClicked);
-            BackgroundCombo.PreviewMouseDown += new MouseButtonEventHandler(Combo_BackgroundClicked);
-            BackgroundCombo.PreviewMouseLeftButtonDown += new MouseButtonEventHandler(Combo_BackgroundClicked);
+            BackgroundCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_ColourChanged);
+            BackgroundCombo.MouseUp += new MouseButtonEventHandler(Combo_BackgroundClicked);
+            BackgroundCombo.PreviewMouseUp += new MouseButtonEventHandler(Combo_BackgroundClicked);
+            BackgroundCombo.PreviewMouseLeftButtonUp += new MouseButtonEventHandler(Combo_BackgroundClicked);
             ForegroundCombo.SelectedIndex = 0;
-            ForegroundCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_ForegroundChanged);
+            ForegroundCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_ColourChanged);
             ForegroundCombo.MouseDown += new MouseButtonEventHandler(Combo_BackgroundClicked);
             FontStyleCombo.SelectedIndex = 0;
             FontStyleCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_FontStyleChanged);
             FontWeightCombo.SelectedIndex = 0;
             FontWeightCombo.SelectionChanged += new SelectionChangedEventHandler(Combo_FontWeightChanged);
+        }
+
+        private void BrushUpdated(object sender, DataTransferEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void LoadDefaultFilter(object sender, RoutedEventArgs e)
@@ -101,7 +114,7 @@ namespace LogViewerExperiement
             data.m_FilterPattern = UE3_TIMESTAMP;
             data.m_Style = new Run() { FontWeight = FontWeights.Bold };
 
-            List<FilterData> items =  new List<FilterData>();
+            items =  new List<FilterData>();
             items.Add(data);
             CurrentFilter.ItemsSource = items;
             CurrentFilter.SelectedIndex = 0;
@@ -120,8 +133,12 @@ namespace LogViewerExperiement
 
         private void LoadFilter(object sender, RoutedEventArgs e)
         {
+            LoadFilter();
+        }
+        private void LoadFilter()
+        {
             StreamReader reader = new StreamReader("Filter.cfg");
-            List<FilterData> items = new List<FilterData>();
+            items = new List<FilterData>();
 
             while (!reader.EndOfStream)
             {
@@ -129,7 +146,14 @@ namespace LogViewerExperiement
                 filter.m_Name = reader.ReadLine();
                 filter.m_FilterPattern = reader.ReadLine();
                 string filterStyle = reader.ReadLine();
-                filter.m_Style = XamlReader.Parse(filterStyle) as Run;
+                try
+                {
+                    filter.m_Style = XamlReader.Parse(filterStyle) as Run;
+                }
+                catch(XamlParseException e)
+                {
+                    Console.Write("Error loading filters: {0} ", e.Message);
+                }
                 items.Add(filter);
             }
             reader.Close();
@@ -147,9 +171,12 @@ namespace LogViewerExperiement
 
             foreach(FilterData data in CurrentFilter.Items)
             {
+                var style = data.m_Style;
+                string filterStyle = XamlWriter.Save(style);
+
                 writer.WriteLine(data.m_Name);
                 writer.WriteLine(data.m_FilterPattern);
-                writer.WriteLine(data.m_Style.ToString());
+                writer.WriteLine(filterStyle);
             }
 
             FilterData firstItem = new FilterData();
@@ -169,6 +196,31 @@ namespace LogViewerExperiement
             }
             writer.Close();
         }
+        void ResetFilter()
+        {
+            FilterName.Text = DefaultFilterName;
+            SearchFilter.Text = SearchFilterLabel.Content.ToString();
+            viewer.Inlines.Clear();
+            viewer.Inlines.Add(new Run(DefaultSampleText));
+        }
+        private void DeleteFilter(object sender, RoutedEventArgs e)
+        {
+            var Filter = CurrentFilter.FindName(FilterName.Text) as FilterData;
+            items.Remove(Filter);
+            CurrentFilter.ItemsSource = items;
+
+            ResetFilter();
+        }
+        private void AddFilter(object sender, RoutedEventArgs e)
+        {
+            FilterData data = new FilterData();
+            data.m_Name = FilterName.Text;
+            data.m_FilterPattern = SearchFilter.Text;
+            data.m_Style = viewer.Inlines.FirstInline as Run;
+            items.Add(data);
+
+            ResetFilter();
+        }
         private void Combo_FilterChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count > 0)
@@ -178,22 +230,23 @@ namespace LogViewerExperiement
             }
         }
 
-        private void Combo_BackgroundChanged(object sender, SelectionChangedEventArgs e)
+        private void Combo_ColourChanged(object sender, SelectionChangedEventArgs e)
         {
+            Console.Write("ColourChanged by {0} ", (sender as FrameworkElement).Name);
             var style = viewer.Inlines.FirstInline;
             if(e.AddedItems.Count == 1)
             {
-                var colour = e.AddedItems[0] as Run;
-                style.Background = colour.Background;
-            }
-        }
-        private void Combo_ForegroundChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var style = viewer.Inlines.FirstInline;
-            if(e.AddedItems.Count == 1)
-            {
-                var colour = e.AddedItems[0] as Run;
-                style.Foreground = colour.Background;
+                var tb = e.AddedItems[0] as TextBlock;
+                var colour = tb.Inlines.First() as Run;
+                Console.Write("to {0}\n", (colour.Background as SolidColorBrush).Color);
+                if(sender == BackgroundCombo)
+                {
+                    style.Background = colour.Background;
+                }
+                else if(sender == ForegroundCombo)
+                {
+                    style.Foreground = colour.Background;
+                }
             }
         }
         private void Combo_FontStyleChanged(object sender, SelectionChangedEventArgs e)
@@ -213,11 +266,20 @@ namespace LogViewerExperiement
                 FontWeight fontWeight = (FontWeight) e.AddedItems[0];
                 style.FontWeight = fontWeight;
             }
-        }
+        }   
 
         private void Combo_BackgroundClicked(object sender, MouseButtonEventArgs e)
         {
-            Console.Write("Clicked on {0}\n", sender.ToString());
+            var frameworkElement = sender as FrameworkElement;
+            var frameworkContentElement = sender as Run;
+            if(frameworkElement != null)
+            {
+                Console.Write("Clicked on {0}\n", frameworkElement.Name);
+            }
+            if (frameworkContentElement != null)
+            {
+                Console.Write("Clicked on {0} {1}\n", frameworkContentElement.ToString(), frameworkContentElement.Text);
+            }
         }
     }
 }
