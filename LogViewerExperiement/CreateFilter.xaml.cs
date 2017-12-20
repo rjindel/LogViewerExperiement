@@ -29,6 +29,8 @@ namespace LogViewerExperiement
         List<FontWeight> fontWeights;
         List<TextBlock> brushes;
         List<FilterData> items;
+
+        TextBlock defaultBrushTextBlock;
         public CreateFilter()
         {
             InitializeComponent();
@@ -77,12 +79,20 @@ namespace LogViewerExperiement
                 Run backgroundRun = new Run(prop.Name) { Background = brush };
                 TextBlock tb = new TextBlock(backgroundRun);
 
+                if(prop.Name == "Black")
+                {
+                    defaultBrushTextBlock = tb;
+                    defaultBrushTextBlock.Inlines.FirstInline.Foreground = Brushes.White;
+                }
+
                 brushes.Add(tb);
             }
 
             BackgroundCombo.ItemsSource = new List<TextBlock>(brushes);
             ForegroundCombo.ItemsSource = brushes;
 
+            BackgroundCombo.SelectedItem = defaultBrushTextBlock;
+            ForegroundCombo.SelectedItem = defaultBrushTextBlock;
             BackgroundCombo.SelectionChanged += Combo_ColourChanged;
             ForegroundCombo.SelectionChanged += Combo_ColourChanged;
             FontStyleCombo.SelectionChanged += Combo_FontStyleChanged;
@@ -187,18 +197,8 @@ namespace LogViewerExperiement
             var defaultRun = new Run(DefaultSampleText);
             viewer.Inlines.Add(defaultRun);
 
-            //foreach(var brush in brushes)
-            //{
-            //    Run currentRun = brush.Inlines.FirstInline as Run;
-            //    if((currentRun.Background as SolidColorBrush).Color == (defaultRun.Background as SolidColorBrush).Color)
-            //    {
-            //        defaultRun.Text = currentRun.Text;
-            //    }
-            //}
-
-            var tb = new TextBlock(defaultRun);
-            BackgroundCombo.SelectedItem = tb;
-            ForegroundCombo.SelectedItem = tb;
+            BackgroundCombo.SelectedItem = defaultBrushTextBlock;
+            ForegroundCombo.SelectedItem = defaultBrushTextBlock;
         }
         private void DeleteFilter(object sender, RoutedEventArgs e)
         {
