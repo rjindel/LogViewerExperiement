@@ -9,12 +9,11 @@ using System.Windows.Controls;
 
 namespace LogViewerExperiement
 {
-    class HighlightFilter
+    class HighlightFilter : FilterBase
     {
         string m_SearchPattern;
 
         Run m_Style;
-        Regex m_Parser;
 
         public HighlightFilter(string searchPattern, Run HighlightStyle)
         {
@@ -23,28 +22,29 @@ namespace LogViewerExperiement
             m_Style = HighlightStyle;
         }
 
-        public TextBlock Process(string Text)
+        public override TextBlock Process(string Text)
         {
             //TODO: rename
-            TextBlock tb = new TextBlock();
+            TextBlock textBlock = new TextBlock();
 
             Match match = m_Parser.Match(Text);
             if (match.Success)
             {
                 Run HighlightedText = new Run();
-                HighlightedText.Foreground = m_Style.Foreground;
-                HighlightedText.FontWeight = m_Style.FontWeight;
                 HighlightedText.Background = m_Style.Background;
-                //HighlightedText. = m_Style.;
+                HighlightedText.Foreground = m_Style.Foreground;
+                HighlightedText.FontStyle  = m_Style.FontStyle;
+                HighlightedText.FontWeight = m_Style.FontWeight;
+
                 HighlightedText.Text = match.Value;
-                tb.Inlines.Add(HighlightedText);
-                tb.Inlines.Add(Text.Substring(match.Index + match.Length));
+                textBlock.Inlines.Add(HighlightedText);
+                textBlock.Inlines.Add(Text.Substring(match.Index + match.Length));
             }
             else
             {
-                tb.Inlines.Add(Text);
+                textBlock.Inlines.Add(Text);
             }
-            return tb;
+            return textBlock;
         }
     }
 }
