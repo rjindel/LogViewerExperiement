@@ -22,9 +22,12 @@ namespace LogViewerExperiement
     /// </summary>
     public partial class MainWindow : Window
     {
+        public string DefaultTitle = "UE Log Tool";
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = this;
+            Title = DefaultTitle;
         }
 
         void ShowOpenFileDialog(Object sender, RoutedEventArgs args)
@@ -35,6 +38,7 @@ namespace LogViewerExperiement
 
             if(fileDialog.ShowDialog() == true)
             {
+                Title = fileDialog.FileName + " - " + DefaultTitle;
                 OpenFile(fileDialog.FileName);
             }
         }

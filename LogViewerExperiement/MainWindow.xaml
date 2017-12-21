@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LogViewerExperiement"
         mc:Ignorable="d"
-        Title="UE4 Log Tool" Height="350" Width="525">
+        Height="350" Width="525">
     <DockPanel ScrollViewer.CanContentScroll="True">
         <WrapPanel DockPanel.Dock="Top" >
             <Button Height="25" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" Click="ShowOpenFileDialog" Content="Open Log" />
